@@ -5,6 +5,7 @@
 #include <linux/uaccess.h>
 #include <linux/ktime.h>
 #include <linux/device.h>
+#include <linux/version.h>
 
 #define DEVICE_NAME "realtime_offset"
 
@@ -32,8 +33,12 @@ static int __init offset_init(void){
       printk(KERN_ALERT DEVICE_NAME " failed to register a major number\n");
       return majorNumber;
    }
-
+   
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 4, 0))
    offsetClass = class_create(THIS_MODULE, "realtime_offset_class");
+#else
+   offsetClass = class_create("realtime_offset_class");
+#endif
    if (IS_ERR(offsetClass)){
       unregister_chrdev(majorNumber, DEVICE_NAME);
       printk(KERN_ALERT "Failed to register device class\n");
